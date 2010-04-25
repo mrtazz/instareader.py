@@ -3,7 +3,7 @@ Instareader.py
 
 Instapaper is hungry for Google Reader Stars. It needs spoon.
 
-This is that spoon. 
+This is that spoon.
 
 Why?
 ----
@@ -13,9 +13,9 @@ Installation
 ------------
 
 	sudo easy_install opster
-	sudo curl http://github.com/kennethreitz/instareader.py/raw/master/instareader.py -o /usr/bin/instareader
+	sudo curl http://github.com/mrtazz/instareader.py/raw/master/instareader.py -o /usr/bin/instareader
 	sudo chmod +x /usr/bin/instareader
-		
+
 `cron` it up and you're golden.
 
 
@@ -23,4 +23,4 @@ Usage
 ------
 
 	instareader readername:password instapapername:password
-	
+
