@@ -10,13 +10,13 @@ import sys, urllib, urllib2, re
 
 class Instapaper:
 	''' Base class for Instapaper connection'''
-	
+
 	def __init__(self, user, password):
 		self.user = user
 		self.password = password
 		self.authurl = "https://www.instapaper.com/api/authenticate"
 		self.addurl = "https://www.instapaper.com/api/add"
-		
+
 	def addItem(self, url, title=""):
 		''' Method to add a new item to a instapaper account
 			Returns 0 on success and -1 if something went wrong
@@ -32,7 +32,7 @@ class Instapaper:
 				return -1
 		except IOError, e:
 			return -1
-			
+
 class GoogleReader:
 	''' Simple Google Reader API wrapper'''
 	def __init__(self, login, password):
@@ -76,9 +76,9 @@ class GoogleReader:
 		return header
 
 	def get_starred_items(self,count=60,header=None):
-		''' method to get starred items from google reader 
+		''' method to get starred items from google reader
 			returns a list of hashmaps of the form
-			item = { 
+			item = {
 					'title' : "foo",
 					'url' : "bla"
 					'item' : "baz"
@@ -177,14 +177,14 @@ class GoogleReader:
 
 @command(usage='googlereader:auth instapaper:auth')
 def main(rauth, iauth):
-	'''Takes Google Reader's starred items and pushes them to instapaper. 
+	'''Takes Google Reader's starred items and pushes them to instapaper.
 	'''
-	
+
 	gr = GoogleReader(*rauth.split(':'))
 	instapaper = Instapaper(*iauth.split(':'))
 	items = gr.get_starred_items(count='100',header=gr.header)
 	# get items in the right temporal order
-	items.reverse() 
+	items.reverse()
 	for i in items:
 		instapaper.addItem(i['url'],i['title'])
 		gr.remove_starred_item(item=i['item'],feed=i['feed'])
