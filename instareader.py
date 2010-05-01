@@ -4,9 +4,9 @@
 """ InstaReader.py -- Feeds Instapaper with Google Stars. Google makes the best Stars.
 """
 
-from opster import command
+from optparse import OptionParser
 import xml.dom.minidom
-import sys, urllib, urllib2, re
+import sys, urllib, urllib2, re, os
 
 class Instapaper:
         ''' Base class for Instapaper connection'''
@@ -37,19 +37,6 @@ class Instapaper:
                         return -1
 
 class GoogleReader:
-@command(usage='googlereader:auth instapaper:auth')
-def main(rauth, iauth):
-	'''Takes Google Reader's starred items and pushes them to instapaper.
-	'''
-
-	gr = GoogleReader(*rauth.split(':'))
-	instapaper = Instapaper(*iauth.split(':'))
-	items = gr.get_starred_items(count='100',header=gr.header)
-	# get items in the right temporal order
-	items.reverse()
-	for i in items:
-		instapaper.addItem(i['url'],i['title'])
-		gr.remove_starred_item(item=i['item'],feed=i['feed'])
         ''' Simple Google Reader API wrapper'''
         def __init__(self, login, password):
                 self.login = login
@@ -193,6 +180,55 @@ def main(rauth, iauth):
                         print e
                         return -5
 
+def main():
+        '''Takes Google Reader's starred items and pushes them to instapaper.
+        '''
+        # initialize parser
+        usage = "usage: %prog googleuser:pass instauser:pass"
+        version = "%prog 1.0"
+        parser = OptionParser(usage)
+
+        # get options and arguments
+        (options, args) = parser.parse_args()
+
+        # credentials hashmap where we store username and password in an array
+        credentials = {}
+        credentials["google"] = []
+        credentials["instapaper"] = []
+        # parse arguments
+        if len(args) == 2:
+            try:
+                credentials["google"].append(args[0].split(":")[0])
+                credentials["google"].append(args[0].split(":")[1])
+                credentials["instapaper"].append(args[1].split(":")[0])
+                credentials["instapaper"].append(args[1].split(":")[1])
+            except IndexError, e:
+                parser.error("Wrong password format.")
+                sys.exit(-1)
+        else:
+            # auth regex
+            login = re.compile("(.+?)=(.+?):(.+)")
+            try:
+                f = open(os.path.expanduser("~") + "/.instareaderrc")
+                for line in f:
+                    m = login.match(line)
+                    if m:
+                        credentials[m.group(1).strip()].append(m.group(2).strip())
+                        credentials[m.group(1).strip()].append(m.group(3).strip())
+            except Exception, e:
+                 #parser.error("No login information present.")
+                 print e
+                 sys.exit(-1)
+
+        gr = GoogleReader(credentials["google"][0],credentials["google"][1])
+        instapaper = Instapaper(credentials["instapaper"][0],
+                                credentials["instapaper"][1])
+        items = gr.get_starred_items(count='100',header=gr.header)
+        # get items in the right temporal order
+        items.reverse()
+        for i in items:
+            instapaper.addItem(i['url'],i['title'])
+            gr.remove_starred_item(item=i['item'],feed=i['feed'])
 
 if __name__ == '__main__':
-	main()
+        main()
